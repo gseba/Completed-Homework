@@ -1,0 +1,176 @@
+Sub Multiple_Year_Stock_Data_SEBA():
+
+' Set an initial variable for holding the Ticker Symbol
+Dim Ticker_Symbol As String
+
+' Set an initial variable for holding the Total Daily Volume
+Dim Daily_Volume As Double
+Daily_Volume = 0
+
+' Keep track of the location for each Stock in the summary table
+Dim Summary_Table_Row As Integer
+Summary_Table_Row = 2
+
+' Format the Summary Table Set the cell color to yellow and Number style General
+Range("J1:J290").NumberFormat = "#,##0_);(#,##0)"
+Range("L2:L290").NumberFormat = "0.00%"
+
+' Establish the last row
+LastRow = Cells(Rows.Count, 1).End(xlUp).Row
+
+' Format Summary Table with Borders
+With Range("I1:L290")
+        .Borders(xlEdgeLeft).LineStyle = xlContinuous
+        .Borders(xlEdgeTop).LineStyle = xlContinuous
+        .Borders(xlEdgeBottom).LineStyle = xlContinuous
+        .Borders(xlEdgeRight).LineStyle = xlContinuous
+    End With
+
+' Add Table Headers in Summary Table
+Range("I1").Value = "Ticker"
+Range("J1").Value = "Total Stock Volume"
+Range("K1").Value = "Price Change"
+Range("L1").Value = "Percentage Change"
+
+' Set the Conditional Formatting to show areas of interest in Price Change column
+Range("K2").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.FormatConditions.AddColorScale ColorScaleType:=3
+    Selection.FormatConditions(Selection.FormatConditions.Count).SetFirstPriority
+    Selection.FormatConditions(1).ColorScaleCriteria(1).Type = _
+        xlConditionValueLowestValue
+    With Selection.FormatConditions(1).ColorScaleCriteria(1).FormatColor
+        .Color = 7039480
+        .TintAndShade = 0
+    End With
+    Selection.FormatConditions(1).ColorScaleCriteria(2).Type = _
+        xlConditionValuePercentile
+    Selection.FormatConditions(1).ColorScaleCriteria(2).Value = 50
+    With Selection.FormatConditions(1).ColorScaleCriteria(2).FormatColor
+        .Color = 12611584
+        .TintAndShade = 0
+    End With
+    Selection.FormatConditions(1).ColorScaleCriteria(3).Type = _
+        xlConditionValueHighestValue
+    With Selection.FormatConditions(1).ColorScaleCriteria(3).FormatColor
+        .Color = 8109667
+        .TintAndShade = 0
+    End With
+   
+
+' Loop through all Ticker Symbols
+For i = 2 To LastRow
+
+     ' Check if we are still within the Ticker Symbol, if it is not...
+    If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+    
+    ' Set the Ticker Symbol
+      Ticker_Symbol = Cells(i, 1).Value
+      
+      ' Add to the Total Daily Volume
+      Daily_Volume = Daily_Volume + Cells(i, 7).Value
+      
+      ' Print the Stock Tocker in the Summary Table
+      Range("I" & Summary_Table_Row).Value = Ticker_Symbol
+      
+      ' Print the Total Daily Volume to the Summary Table
+      Range("J" & Summary_Table_Row).Value = Daily_Volume
+      
+      ' Add one to the summary table row
+      Summary_Table_Row = Summary_Table_Row + 1
+      
+      ' Reset the Total Daily Volume
+      Daily_Volume = 0
+      
+      ' If the cell immediately following a row is the same brand...
+    Else
+
+      ' Add to the Total Daily Volume
+      Daily_Volume = Daily_Volume + Cells(i, 7).Value
+
+    End If
+    
+    
+  Next i
+  
+  ' Set an initial variable for holding the Close Price
+  
+  Dim Close_Price As Double
+  Close_Price = 0
+  
+  ' Set an initial variable for holding the Open Price
+  
+  Dim Open_Price As Double
+  Open_Price = 0
+  
+  ' Set a variable as a boolean to True that will help establish and additional condition in determining the frist Open Price
+    
+  Dim Grab_First As Boolean
+  Grab_First = True
+  
+  ' Set a variable for holding the Price Change
+  
+  Dim Price_Change As Double
+  
+  ' Set a variable for holding the Percentage Change
+  
+  Dim Percent_Change As Double
+    
+  ' Reset the Summary Row Table to 2
+    
+  Summary_Table_Row = 2
+      
+ ' Loop through all Ticker Symbols
+For i = 2 To LastRow
+
+    ' Check if we are still within the Ticker Symbol, if it is not...
+    If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+    
+        ' Look for difference between Open price at the beggining of the year and close price at the end
+        Close_Price = Cells(i, 6).Value
+        
+        ' Subtract Open price from close price
+        Price_Change = Close_Price - Open_Price
+        
+        ' Divide Price Change by Open price to get Percentage Change
+        
+        Percent_Change = (Price_Change / Open_Price)
+        
+         'Print the Percent Change to the Summary Table
+        Range("L" & Summary_Table_Row).Value = Percent_Change
+                
+         'Print the Price Change to the Summary Table
+        Range("K" & Summary_Table_Row).Value = Price_Change
+        
+        ' Add one to the summary table row
+        Summary_Table_Row = Summary_Table_Row + 1
+        
+        ' Reset Price_Change
+        Price_Change = 0
+              
+        'Reset the Open Price
+        Open_Price = 0
+        
+        ' Reset Boolean
+        Grab_First = True
+                
+    Else
+       If Grab_First = True And Open_Price = 0 Then
+        Open_Price = Cells(i, 3).Value
+        
+        Grab_First = False
+        
+    End If
+        
+    End If
+    
+    Next i
+        
+        
+    
+    
+End Sub
+      
+
+
+
